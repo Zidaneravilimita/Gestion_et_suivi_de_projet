@@ -1,6 +1,8 @@
-import './assets/main.css'
+import './assets/main.css';
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router'; // Importez le routeur ici
 
-import { createApp } from 'vue'
-import App from './App.vue'
-
-createApp(App).mount('#app')
+createApp(App)
+  .use(router) // Ajoutez le routeur à votre application
+  .mount('#app');
