@@ -1,75 +1,73 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-white">
-    <form class="bg-gray-100 p-6 rounded-lg shadow-md w-full max-w-sm">
-      <h2 class="text-2xl text-gray-800 mb-4 text-center">Inscription</h2>
-      <div class="mb-4">
-        <label for="email" class="block text-gray-700 mb-2">Email</label>
-        <input
-          type="email"
-          id="email"
-          v-model="email"
-          class="w-full p-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500"
-          required
-        />
-      </div>
-      <div class="mb-4">
-        <label for="username" class="block text-gray-700 mb-2">Nom d'utilisateur</label>
-        <input
-          type="text"
-          id="username"
-          v-model="username"
-          class="w-full p-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500"
-          required
-        />
-      </div>
-      <div class="mb-4">
-        <label for="password" class="block text-gray-700 mb-2">Mot de passe</label>
-        <div class="relative">
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            id="password"
-            v-model="password"
-            class="w-full p-2 bg-white border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500"
-            required
-          />
-          <button type="button" @click="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500">
-            <span v-if="showPassword">👁️</span>
-            <span v-else>👁️‍🗨️</span>
-          </button>
+  <div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+      <h2 class="text-2xl font-bold mb-4 text-center">Inscription</h2>
+
+      <form @submit.prevent="register">
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700">Email</label>
+          <input v-model="email" type="email" id="email" required
+                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
-      </div>
-      <button
-        type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded focus:outline-none"
-        @click.prevent="submitRegister"
-      >
-        S'inscrire
-      </button>
-      <p class="mt-4 text-center">
-        Déjà membre ? <a href="/login" class="text-blue-600 hover:underline">Se connecter</a>
+
+        <div class="mb-4">
+          <label for="password" class="block text-gray-700">Mot de passe</label>
+          <input v-model="password" type="password" id="password" required
+                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+
+        <div class="mb-4">
+          <label for="confirmPassword" class="block text-gray-700">Confirmer mot de passe</label>
+          <input v-model="confirmPassword" type="password" id="confirmPassword" required
+                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+
+        <div v-if="error" class="mb-4 text-red-500 text-sm">
+          {{ error }}
+        </div>
+
+        <button type="submit"
+                class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition duration-200">
+          S'inscrire
+        </button>
+      </form>
+
+      <p class="text-sm text-center mt-4">
+        Vous avez déjà un compte ?
+        <router-link to="/login" class="text-blue-500 hover:underline">Se connecter</router-link>
       </p>
-    </form>
+    </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      email: '',
-      username: '',
-      password: '',
-      showPassword: false
-    };
-  },
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword;
-    },
-    submitRegister() {
-      // Logique d'inscription ici
-      console.log('Inscription:', this.email, this.username, this.password);
-    }
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/firebase'
+
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const error = ref('')
+const router = useRouter()
+
+const register = async () => {
+  if (password.value !== confirmPassword.value) {
+    error.value = "Les mots de passe ne correspondent pas"
+    return
   }
-};
+
+  try {
+    await createUserWithEmailAndPassword(auth, email.value, password.value)
+    router.push('/dashboard')
+  } catch (err) {
+    console.error(err)
+    error.value = "Erreur lors de l'inscription : " + err.message
+  }
+}
 </script>
+
+<style scoped>
+/* Ajoute des styles personnalisés si besoin */
+</style>
