@@ -47,6 +47,7 @@ const router = useRouter()
 const login = async () => {
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value)
+    alert('Connexion réussie ! Bienvenue.')
     router.push('/dashboard')
   } catch (err) {
     console.error('Erreur de connexion :', err)
@@ -56,5 +57,4 @@ const login = async () => {
 </script>
 
 <style scoped>
-
 </style>
