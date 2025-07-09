@@ -76,24 +76,30 @@
 
         <!-- Créer un projet -->
         <section id="create-project" class="bg-white p-6 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4">Créer un projet</h2>
+          <h2 class="text-xl text-black font-semibold mb-4">Créer un projet</h2>
           <ProjectCreateForm />
+        </section>
+
+        <!-- Résumé des projets -->
+        <section class="bg-white p-6 rounded shadow">
+          <ProjectSummary />
         </section>
 
         <!-- Liste des projets -->
         <section id="project-list" class="bg-white p-6 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4">Liste des projets</h2>
+          <h2 class="text-xl text-black font-semibold mb-4">Liste des projets</h2>
           <ProjectList />
         </section>
 
-        <!-- Créer une tâche -->
+        <!-- Création d'une tâche -->
         <section id="create-task" class="bg-white p-6 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4">Créer une tâche</h2>
+          <h2 class="text-xl text-black font-semibold mb-4">Créer une tâche</h2>
           <TaskCreateForm />
         </section>
 
-        <!-- Liste des Tâches -->
+        <!-- Liste des tâches -->
         <section id="task-list" class="bg-white p-6 rounded shadow">
+          <h2 class="text-xl text-black font-semibold mb-4">Liste des Tâches</h2>
           <TaskList />
         </section>
 
@@ -117,7 +123,7 @@
             <h3 class="text-lg font-semibold mb-3">Contact</h3>
             <p>Email : <a href="mailto:tahiendrazazidane@gmail.com" class="text-blue-600 hover:underline">tahiendrazazidane@gmail.com</a></p>
             <p>Tél : +261 32 68 792 14</p>
-            <p>Tél : +261 32 30 792 14</p>
+            <p>Tél : +261 34 30 970 61</p>
           </div>
 
           <!-- Réseaux sociaux -->
@@ -155,15 +161,18 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, signOut } from 'firebase/auth'
 
+// Composants
 import UserProfileCard from '@/components/Users/UserProfileCard.vue'
 import ProjectCreateForm from '@/components/Project/ProjectCreateForm.vue'
 import ProjectList from '@/components/Project/ProjectList.vue'
+import ProjectSummary from '@/components/Project/ProjectSummary.vue'
+import SimpleChart from '@/components/Project/SimpleChart.vue'
 import TaskCreateForm from '@/components/Task/TaskCreateForm.vue'
 import TaskList from '@/components/Task/TaskList.vue'
-import SimpleChart from '@/components/Project/SimpleChart.vue'
 
 const router = useRouter()
 const auth = getAuth()
+
 const openMenus = ref([])
 const isSidebarOpen = ref(true)
 

@@ -34,7 +34,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore'
-import { db } from '@/firebase' // Assurez-vous que le chemin est correct
+import { db } from '@/firebase' 
 
 const tasks = ref([])
 
