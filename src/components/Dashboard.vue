@@ -2,10 +2,8 @@
   <div class="flex min-h-screen overflow-hidden">
     <!-- Sidebar -->
     <aside
-      :class="[
-        'bg-white shadow-lg p-6 fixed top-0 left-0 h-full z-10 transition-transform duration-300',
-        isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full'
-      ]"
+      :class="['bg-white shadow-lg p-6 fixed top-0 left-0 h-full z-10 transition-transform duration-300',
+               isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full']"
     >
       <h2 class="text-xl font-bold mb-6">Navigation</h2>
       <ul class="space-y-6">
@@ -54,14 +52,12 @@
     </aside>
 
     <!-- Contenu principal -->
-    <div class="flex-1 bg-gray-100 min-h-screen ml-0 md:ml-64 transition-all duration-300">
+    <div class="flex-1 bg-gray-100 min-h-screen ml-0 md:ml-64">
       <!-- Navigation haute -->
       <nav class="bg-white p-4 shadow sticky top-0 z-20 flex justify-between items-center">
         <div class="flex items-center space-x-4">
-          <!-- Burger Icon -->
-          <button @click="isSidebarOpen = !isSidebarOpen" class="md:hidden text-gray-800 focus:outline-none mr-4">
-            <!-- Font Awesome burger icon -->
-              <i class="fas fa-bars text-xl text-gray-800" @click="isSidebarOpen = !isSidebarOpen"></i>
+          <button @click="isSidebarOpen = !isSidebarOpen" class="md:hidden text-2xl">
+            ☰
           </button>
           <h1 class="text-2xl font-bold text-gray-800">Tableau de bord</h1>
         </div>
@@ -72,7 +68,7 @@
       </nav>
 
       <!-- Sections -->
-      <div class="p-6 space-y-10">
+      <div class="p-6 space-y-8">
         <!-- Utilisateur -->
         <section id="user-list">
           <UserProfileCard />
@@ -80,31 +76,35 @@
 
         <!-- Créer un projet -->
         <section id="create-project" class="bg-white p-6 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4 text-black">Créer un projet</h2>
+          <h2 class="text-xl font-semibold mb-4">Créer un projet</h2>
           <ProjectCreateForm />
         </section>
 
         <!-- Liste des projets -->
         <section id="project-list" class="bg-white p-6 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4 text-black">Liste des projets</h2>
+          <h2 class="text-xl font-semibold mb-4">Liste des projets</h2>
           <ProjectList />
         </section>
 
-        <!-- Tâches -->
+        <!-- Créer une tâche -->
+        <section id="create-task" class="bg-white p-6 rounded shadow">
+          <h2 class="text-xl font-semibold mb-4">Créer une tâche</h2>
+          <TaskCreateForm />
+        </section>
+
+        <!-- Liste des Tâches -->
         <section id="task-list" class="bg-white p-6 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4 text-black">Liste des Tâches</h2>
-          <TaskBoard />
+          <TaskList />
         </section>
 
         <!-- Statistiques -->
         <section id="stats" class="bg-white p-6 rounded shadow">
-          <h2 class="text-xl font-semibold mb-4 text-black">Statistiques</h2>
           <SimpleChart />
         </section>
       </div>
 
-      <!-- Footer -->
-      <footer class="bg-white px-6 py-10 shadow mt-12">
+      <!-- Pied de page -->
+      <footer class="bg-white px-6 py-10 shadow mt-auto">
         <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm text-gray-700">
           <!-- À propos -->
           <div>
@@ -155,11 +155,11 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, signOut } from 'firebase/auth'
 
-// Composants
 import UserProfileCard from '@/components/Users/UserProfileCard.vue'
 import ProjectCreateForm from '@/components/Project/ProjectCreateForm.vue'
 import ProjectList from '@/components/Project/ProjectList.vue'
-import TaskBoard from '@/components/Task/TaskBoard.vue'
+import TaskCreateForm from '@/components/Task/TaskCreateForm.vue'
+import TaskList from '@/components/Task/TaskList.vue'
 import SimpleChart from '@/components/Project/SimpleChart.vue'
 
 const router = useRouter()
@@ -185,5 +185,4 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-/* Aucun style personnalisé requis */
 </style>
