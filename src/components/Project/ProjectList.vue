@@ -1,17 +1,40 @@
 <template>
   <div class="bg-white p-6 rounded shadow">
-    <div v-for="(project, index) in projects" :key="project.id" class="border p-4 rounded mb-4 shadow-sm">
+    <!-- Barre de recherche & filtre -->
+    <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-6">
+      <input v-model="keyword" type="text" placeholder="Rechercher un projet..."
+             class="flex-1 mb-3 md:mb-0 border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"/>
+
+      <select v-model="statusFilter" class="border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-black">
+        <option value="">Tous les statuts</option>
+        <option>En cours</option>
+        <option>Terminé</option>
+        <option>En attente</option>
+      </select>
+    </div>
+
+    <!-- Liste filtrée -->
+    <div v-for="project in filteredProjects" :key="project.id" class="border p-4 rounded mb-4 shadow-sm">
       <div class="flex justify-between items-start">
         <div>
           <h3 class="text-lg font-bold text-black">{{ project.title }}</h3>
           <p class="text-gray-800">{{ project.description }}</p>
-          <p class="text-sm text-gray-700 mt-1">Statut : {{ project.status }} | Deadline : {{ project.deadline }}</p>
+          <p class="text-sm text-gray-700 mt-1">
+            Statut :
+            <span :class="statusClass(project.status)">{{ project.status }}</span>
+            | Deadline : {{ project.deadline || '—' }}
+          </p>
         </div>
         <div class="flex flex-col items-end space-y-2">
           <button @click="openEditModal(project)" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">Modifier</button>
           <button @click="deleteProject(project.id)" class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600">Supprimer</button>
         </div>
       </div>
+    </div>
+
+    <!-- Pagination basique -->
+    <div v-if="hasMore" class="text-center mt-4">
+      <button @click="loadMore" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-black">Charger plus</button>
     </div>
 
     <!-- Modale d'édition -->
@@ -50,30 +73,64 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'
+import { ref, computed, onMounted } from 'vue'
+import { collection, getDocs, query, orderBy, limit, startAfter, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
 
 const projects = ref([])
+const lastDoc = ref(null)
+const hasMore = ref(true)
+const pageSize = 5
+
+const keyword = ref('')
+const statusFilter = ref('')
+
 const editModalVisible = ref(false)
 const editedProject = ref({})
 
-const loadProjects = async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'projects'))
-    projects.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-  } catch (error) {
-    console.error('Erreur lors du chargement des projets :', error)
+const statusClass = (status) => {
+  return {
+    'text-green-600 font-semibold': status === 'Terminé',
+    'text-yellow-600 font-semibold': status === 'En attente',
+    'text-blue-600 font-semibold': status === 'En cours'
   }
 }
 
-const deleteProject = async (projectId) => {
-  if (confirm('Voulez-vous vraiment supprimer ce projet ?')) {
+const loadProjects = async (initial = false) => {
+  try {
+    let q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'), limit(pageSize))
+    if (!initial && lastDoc.value) q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'), startAfter(lastDoc.value), limit(pageSize))
+    const snap = await getDocs(q)
+    if (initial) projects.value = []
+    projects.value.push(...snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    lastDoc.value = snap.docs[snap.docs.length - 1]
+    hasMore.value = snap.docs.length === pageSize
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const loadMore = () => loadProjects()
+
+const filteredProjects = computed(() => {
+  return projects.value.filter(p => {
+    const matchKeyword = !keyword.value || p.title.toLowerCase().includes(keyword.value.toLowerCase())
+    const matchStatus = !statusFilter.value || p.status === statusFilter.value
+    return matchKeyword && matchStatus
+  })
+})
+
+const deleteProject = async (id) => {
+  if (confirm('Supprimer ce projet ?')) {
     try {
-      await deleteDoc(doc(db, 'projects', projectId))
-      projects.value = projects.value.filter(p => p.id !== projectId)
-    } catch (error) {
-      console.error('Erreur lors de la suppression du projet :', error)
+      await deleteDoc(doc(db, 'projects', id))
+      projects.value = projects.value.filter(p => p.id !== id)
+      toast.success('Projet supprimé !')
+    } catch (e) {
+      toast.error("Échec de la suppression")
     }
   }
 }
@@ -85,17 +142,17 @@ const openEditModal = (project) => {
 
 const updateProject = async () => {
   try {
-    const projectRef = doc(db, 'projects', editedProject.value.id)
-    const { id, ...projectData } = editedProject.value
-    await updateDoc(projectRef, projectData)
-    await loadProjects()
+    const { id, ...data } = editedProject.value
+    await updateDoc(doc(db, 'projects', id), data)
+    toast.success('Projet mis à jour !')
     editModalVisible.value = false
-  } catch (error) {
-    console.error("Erreur lors de la mise à jour du projet :", error)
+    await loadProjects(true)
+  } catch (e) {
+    toast.error("Échec de la mise à jour")
   }
 }
 
-onMounted(loadProjects)
+onMounted(() => loadProjects(true))
 </script>
 
 <style scoped>
