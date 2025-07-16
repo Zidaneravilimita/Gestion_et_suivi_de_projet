@@ -13,7 +13,7 @@
 
     <!-- Titre de la tâche -->
     <div>
-      <label class="block mb-1 text-black">Titre de la tâche</label>
+      <label class="block mb-1">Titre de la tâche</label>
       <input v-model="title" type="text" required class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" />
     </div>
 
@@ -45,6 +45,14 @@
       <input v-model="assignee" type="text" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nom d'utilisateur ou email" />
     </div>
 
+    <!-- Progression -->
+    <div>
+      <label class="block mb-1">Progression (%)</label>
+      <input v-model.number="progress" type="number" min="0" max="100" required
+             class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+             placeholder="0 à 100" />
+    </div>
+
     <!-- Boutons -->
     <div class="flex space-x-4">
       <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Créer</button>
@@ -68,8 +76,8 @@ const description = ref('')
 const priority = ref('Moyenne')
 const deadline = ref('')
 const assignee = ref('')
+const progress = ref(0)
 
-// Charger les projets au montage
 onMounted(async () => {
   try {
     const querySnapshot = await getDocs(collection(db, 'projects'))
@@ -86,6 +94,7 @@ const resetForm = () => {
   priority.value = 'Moyenne'
   deadline.value = ''
   assignee.value = ''
+  progress.value = 0
 }
 
 const handleSubmit = async () => {
@@ -97,7 +106,9 @@ const handleSubmit = async () => {
       priority: priority.value,
       deadline: deadline.value,
       assignee: assignee.value,
+      progress: progress.value,
       createdAt: new Date(),
+      status: progress.value === 100 ? 'Terminé' : 'En cours',
     })
     toast.success('Tâche créée avec succès !')
     resetForm()
